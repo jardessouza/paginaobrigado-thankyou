@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const { Pool } = require('pg');
 require('dotenv').config();
 
 const app = express();
@@ -10,6 +11,12 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
+
+// PostgreSQL Connection
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
 
 // CONFIG PADRÃO
 const DEFAULT_CONFIG = {
@@ -23,29 +30,35 @@ const DEFAULT_CONFIG = {
     avatarText: 'Processando sua compra...',
 };
 
-// Armazenamento em memória
-let config = { ...DEFAULT_CONFIG };
-
 // ============================================
 // ROTAS API
 // ============================================
 
-// GET configurações (lê do dashboard service via HTTP)
+// GET configurações (lê do banco de dados)
 app.get('/api/config', async (req, res) => {
-    // Se existir variável de ambiente com URL do dashboard, buscar de lá
-    const dashboardUrl = process.env.DASHBOARD_URL;
+    try {
+        const result = await pool.query(
+            'SELECT * FROM pixel_config ORDER BY updated_at DESC LIMIT 1'
+        );
 
-    if (dashboardUrl) {
-        try {
-            const response = await fetch(`${dashboardUrl}/api/config`);
-            const data = await response.json();
-            res.json(data);
-        } catch (error) {
-            console.log('Usando config local');
-            res.json(config);
+        if (result.rows.length === 0) {
+            return res.json(DEFAULT_CONFIG);
         }
-    } else {
-        res.json(config);
+
+        const row = result.rows[0];
+        res.json({
+            conversionId: row.conversion_id,
+            conversionLabel: row.conversion_label,
+            redirectUrl: row.redirect_url,
+            purchaseValue: row.purchase_value.toString(),
+            currency: row.currency,
+            companyName: row.company_name,
+            delayRedirect: row.delay_redirect,
+            avatarText: row.avatar_text,
+        });
+    } catch (error) {
+        console.error('Erro ao buscar config:', error);
+        res.json(DEFAULT_CONFIG);
     }
 });
 
