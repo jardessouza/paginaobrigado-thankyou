@@ -108,21 +108,31 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const priceFromUrl = urlParams.get('price') || currentConfig.purchaseValue;
 
-                const script = document.createElement('script');
-                script.async = true;
-                script.src = `https://www.googleadservices.com/pagead/conversion/${currentConfig.conversionId.replace('AW-', '')}/`;
-                document.head.appendChild(script);
-
+                // Inicializar dataLayer
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
 
-                gtag('event', 'purchase', {
-                    'value': parseFloat(priceFromUrl),
-                    'currency': currentConfig.currency,
-                    'transaction_id': 'tx-' + Date.now(),
-                    'send_to': `${currentConfig.conversionId}/${currentConfig.conversionLabel}`
-                });
+                // Carregar gtag.js do Google
+                const gtagScript = document.createElement('script');
+                gtagScript.async = true;
+                gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${currentConfig.conversionId}`;
+                document.head.appendChild(gtagScript);
+
+                // Configurar e enviar evento após script carregar
+                gtagScript.onload = () => {
+                    gtag('config', currentConfig.conversionId, {
+                        'page_path': window.location.pathname,
+                        'page_title': document.title
+                    });
+
+                    gtag('event', 'purchase', {
+                        'value': parseFloat(priceFromUrl),
+                        'currency': currentConfig.currency,
+                        'transaction_id': 'tx-' + Date.now(),
+                        'send_to': `${currentConfig.conversionId}/${currentConfig.conversionLabel}`
+                    });
+                };
 
                 console.log('✅ Pixel Google Ads Ativado:', {
                     conversionId: currentConfig.conversionId,
