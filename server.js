@@ -124,6 +124,7 @@ app.get('/api/config', async (req, res) => {
             delayRedirect: row.delay_redirect,
             avatarText: row.avatar_text,
             avatarImage: row.avatar_image,
+            autoRedirect: row.auto_redirect,
         });
     } catch (error) {
         console.error('Erro ao buscar config:', error);
