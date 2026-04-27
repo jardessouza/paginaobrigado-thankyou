@@ -44,6 +44,7 @@
             const [progress, setProgress] = React.useState(0);
             const [avatarUrl, setAvatarUrl] = React.useState('');
             const [config, setConfig] = React.useState(DEFAULT_CONFIG);
+            const [configLoaded, setConfigLoaded] = React.useState(false);
             const fileInputRef = React.useRef(null);
 
             React.useEffect(() => {
@@ -59,10 +60,12 @@
                     .then(data => {
                         setConfig(data);
                         activatePixelWithConfig(data);
+                        setConfigLoaded(true);
                     })
                     .catch(err => {
                         console.error('Erro ao carregar config:', err);
                         activatePixelWithConfig(DEFAULT_CONFIG);
+                        setConfigLoaded(true);
                     });
 
                 // Simula progresso
@@ -76,7 +79,15 @@
                     });
                 }, 300);
 
-                // Redireciona após delay (se autoRedirect estiver ativado)
+                return () => {
+                    clearInterval(progressInterval);
+                };
+            }, []);
+
+            // Redireciona após config ser carregada e delay passar
+            React.useEffect(() => {
+                if (!configLoaded) return;
+
                 const redirectTimeout = setTimeout(() => {
                     if (config.autoRedirect !== false) {
                         setTimeout(() => {
@@ -89,10 +100,9 @@
                 }, config.delayRedirect || DEFAULT_CONFIG.delayRedirect);
 
                 return () => {
-                    clearInterval(progressInterval);
                     clearTimeout(redirectTimeout);
                 };
-            }, []);
+            }, [configLoaded, config.autoRedirect, config.delayRedirect]);
 
             const activatePixelWithConfig = (currentConfig) => {
                 const urlParams = new URLSearchParams(window.location.search);
