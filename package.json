@@ -1,0 +1,27 @@
+{
+  "name": "paginaobrigado-thankyou",
+  "version": "1.0.0",
+  "description": "Página de obrigado pela compra com ativação automática do pixel Google Ads",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "google-ads",
+    "pixel",
+    "thankyou",
+    "conversion",
+    "purchase"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3"
+  }
+}
