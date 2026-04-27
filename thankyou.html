@@ -36,6 +36,7 @@
             companyName: 'Sua Empresa',
             delayRedirect: 3000,
             avatarText: 'Processando sua compra...',
+            avatarImage: null,
         };
 
         function ThankYouPage() {
@@ -43,6 +44,12 @@
             const [avatarUrl, setAvatarUrl] = React.useState('');
             const [config, setConfig] = React.useState(DEFAULT_CONFIG);
             const fileInputRef = React.useRef(null);
+
+            React.useEffect(() => {
+                if (config.avatarImage) {
+                    setAvatarUrl(config.avatarImage);
+                }
+            }, [config]);
 
             React.useEffect(() => {
                 // Carrega configurações da API

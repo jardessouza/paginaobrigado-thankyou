@@ -55,6 +55,7 @@ app.get('/api/config', async (req, res) => {
             companyName: row.company_name,
             delayRedirect: row.delay_redirect,
             avatarText: row.avatar_text,
+            avatarImage: row.avatar_image,
         });
     } catch (error) {
         console.error('Erro ao buscar config:', error);
