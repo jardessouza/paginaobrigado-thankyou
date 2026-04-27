@@ -37,6 +37,7 @@
             delayRedirect: 3000,
             avatarText: 'Processando sua compra...',
             avatarImage: null,
+            autoRedirect: true,
         };
 
         function ThankYouPage() {
@@ -75,15 +76,17 @@
                     });
                 }, 300);
 
-                // Redireciona após delay
+                // Redireciona após delay (se autoRedirect estiver ativado)
                 const redirectTimeout = setTimeout(() => {
-                    setTimeout(() => {
-                        fetch('/api/config')
-                            .then(res => res.json())
-                            .then(data => window.location.href = data.redirectUrl)
-                            .catch(() => window.location.href = DEFAULT_CONFIG.redirectUrl);
-                    }, 500);
-                }, DEFAULT_CONFIG.delayRedirect);
+                    if (config.autoRedirect !== false) {
+                        setTimeout(() => {
+                            fetch('/api/config')
+                                .then(res => res.json())
+                                .then(data => window.location.href = data.redirectUrl)
+                                .catch(() => window.location.href = DEFAULT_CONFIG.redirectUrl);
+                        }, 500);
+                    }
+                }, config.delayRedirect || DEFAULT_CONFIG.delayRedirect);
 
                 return () => {
                     clearInterval(progressInterval);
